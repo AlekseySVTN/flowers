@@ -35,7 +35,7 @@ class GetFlowersCommand extends Command
             // ...
         }
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+
 
 
         $_SERVER['PANTHER_NO_HEADLESS'] = true;
@@ -98,7 +98,11 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                     $client->executeScript("$('#auth_form input[name=\'username\']').val('".$_SERVER["LOGIN_FLOWERS_TO"]."')");
                     $client->executeScript("$('#auth_form input[name=\'password\']').val('".$_SERVER["PASS_FLOWERS_TO"]."')");
                     $client->executeScript("$('#auth_form button').click();");
-                    sleep("5");
+                    sleep("2");
+                    $client->executeScript("$(\".dashboard-content a:contains(Регистрация заказов)\")[0].click()");
+                    sleep("2");
+                    $client->executeScript("angular.element(document.querySelector('.glyphicon-plus')).click();");
+                    $client->executeScript("angular.element(document.querySelector('#order_id')).val('".$data['id']['value']."');");
                 }else{
                     return;
                 }
@@ -133,7 +137,7 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
         }
 
 
-
+        $io->success('Процесс завершен;');
 
     }
 }
