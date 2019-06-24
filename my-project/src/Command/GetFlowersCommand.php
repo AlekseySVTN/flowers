@@ -44,8 +44,8 @@ class GetFlowersCommand extends Command
             $client = \Symfony\Component\Panther\Client::createChromeClient();
             $crawler = $client->request('GET', 'https://bukedo.ru/cabinet/login/?next=/cabinet/'); // Yes, this
             sleep(1);
-            $client->executeScript("$('.content__wrapper').find('form input[name=\'username\']').val('')");
-            $client->executeScript("$('.content__wrapper').find('form input[name=\'password\']').val('')");
+            $client->executeScript("$('.content__wrapper').find('form input[name=\'username\']').val('".$_SERVER["LOGIN_FLOWERS_FROM"]."')");
+            $client->executeScript("$('.content__wrapper').find('form input[name=\'password\']').val('".$_SERVER["PASS_FLOWERS_FROM"]."')");
             $client->executeScript("$('.content__wrapper').find('.btn.yellow').click();");
             sleep(2);
             $crawler = $client->request('GET', 'https://bukedo.ru/cabinet/orders/?created_from=2019-2-1&created_to=2019-6-24&page_size=1&status=3'); // Yes, this
@@ -70,23 +70,33 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                 $client->executeScript($jquery);
                 sleep(2);
                 // TODO проверить на почту заказа и не плохая оценка
+                $data = [];
                 $data["id"]["name"]  = "номер заказа";
                 $data["id"]["value"] = $client->executeScript("return $('.modal__header h2').html()");
                 $data["date"]["name"] = "дата получения заказа";
                 $data["date"]["value"] = $client->executeScript("return $('.modal__header h2').html()");
                 $data["sum"]["name"] = "стоимость общая";
                 $data["sum"]["value"] = $client->executeScript("return $('.sum-row .price strong').html()");
+                $data["open_text"]["name"] = "текст открытки";
+                $data["open_text"]["value"] = $client->executeScript("return $('.sum-row .price strong').html()");
+                $data["phone"]["name"] = "телефон заказчика";
+                $data["phone"]["value"] = $client->executeScript("return $('.user-contact-info .phone a').html()");
+                $data["email"]["name"] = "почта заказчика";
+                $data["email"]["value"] = $client->executeScript("return $('.sum-row .price strong').html()");
+                $data["fio"]["name"] = "Имя покупателя";
+                $data["fio"]["value"] = $client->executeScript("return $('.sum-row .price strong').html()");
+
+                var_dump($data);
 
                 $line = readline("ОТправить ?");
-                var_dump($data,$line);
                 if($line == "yes"){
 
 
                     //https://butterfly-flower.ru/admin логин Yulya пароль Yulya1984 . заказы я беру с
                     $client->request('GET', 'https://butterfly-flower.ru/admin'); // Yes, this
                     sleep("1");
-                    $client->executeScript("$('#auth_form input[name=\'username\']').val('')");
-                    $client->executeScript("$('#auth_form input[name=\'password\']').val('')");
+                    $client->executeScript("$('#auth_form input[name=\'username\']').val('".$_SERVER["LOGIN_FLOWERS_TO"]."')");
+                    $client->executeScript("$('#auth_form input[name=\'password\']').val('".$_SERVER["PASS_FLOWERS_TO"]."')");
                     $client->executeScript("$('#auth_form button').click();");
                     sleep("5");
                 }else{
