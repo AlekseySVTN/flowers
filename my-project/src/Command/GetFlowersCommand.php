@@ -118,9 +118,7 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
 
 // website is 100% in JavaScript
 
-
-            $client->takeScreenshot('screen.png'); // Yeah, screenshot!
-        }catch (Exception $exception){
+        }catch (\Exception $exception){
             echo $exception->getMessage();
         }
 
