@@ -80,7 +80,7 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                 $data["date"]["value"] = $order["order_date"];
 
                 $data["delivery_time"]["name"] = "дата доставки и время";
-                $data["delivery_time"]["value"] = $order["delivery_date"];
+                $data["delivery_time"]["value"] = strtotime($order["delivery_date"]);
                 $data["delivery_address"]["name"] = "адрес доставки";
                 $data["delivery_address"]["value"] = $order["order_address"];
 
@@ -132,8 +132,8 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                     $client->executeScript("$('#auth_form button').click();");
                     sleep("2");
                     $client->executeScript("$(\".dashboard-content a:contains(Регистрация заказов)\")[0].click()");
-                    sleep("4");
                     $client->executeScript("angular.element(document.querySelector('.glyphicon-plus')).click();");
+                    sleep("4");
                     $client->executeScript("angular.element(document.querySelector('#order_id')).val('".$data['id']['value']."');");
                     $client->executeScript("angular.element(document.querySelector('#channel_id')).val(".$data['man']['value'].");");
                     $client->executeScript("angular.element(document.querySelector('#buket_price')).val('".$data['sum']['value']."');");
@@ -144,6 +144,8 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                     $client->executeScript("angular.element(document.querySelector('#recipient_name')).val('".$data['fio0']['value']."');");
                     $client->executeScript("angular.element(document.querySelector('#reference_id')).val(".$data['from']['value'].");");
                     $client->executeScript("angular.element(document.querySelector('#notice_channel_id')).val(".$data['notify_email']['value'].");");
+                    $client->executeScript("$('input.form-control.text-center.ng-pristine.ng-valid.ng-valid-required').val(".date("Y-m-d", $data['delivery_time']['value']).");");
+
 
                     $line = readline("Сохранить с такими данными?");
                 }else{
