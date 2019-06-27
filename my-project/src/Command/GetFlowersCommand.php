@@ -51,42 +51,74 @@ class GetFlowersCommand extends Command
             $crawler = $client->request('GET', 'https://bukedo.ru/cabinet/orders/?created_from=2019-2-1&created_to=2019-6-24&page_size=1&status=3'); // Yes, this
             sleep(2);
 
-            $script = 'var orders = [];
+            $script = 'var orders = {};
 $(\'.table-lg_orders .modal-link\').each(function(){
-	orders.push($(this).find("td:nth-child(2)").text());
+var order_id = $(this).find("td:nth-child(2)").text();
+var order_date = $(this).find("td:nth-child(3)").text();
+var order_address = $(this).find("td:nth-child(4)").text();
+var delivery_date = $(this).find("td:nth-child(5)").text();
+var price = $(this).find("td:nth-child(7)").text();
+	orders[order_id] = {"order_date" :order_date,"order_address":order_address,"delivery_date":delivery_date};
 }); return orders;';
             $order_ids = $client->executeScript($script);
-
+            sleep(2);
             $jquery = 'var script = document.createElement(\'script\');
 script.src = \'https://code.jquery.com/jquery-1.11.0.min.js\';
 script.type = \'text/javascript\';
 document.getElementsByTagName(\'head\')[0].appendChild(script);';
 
-            foreach ($order_ids as $order_id){
+            foreach ($order_ids as $order_id=>$order){
                 if(!$order_id){
                     continue;
                 }
-                $client->request('GET', "https://bukedo.ru/cabinet/orders/".$order_id."/form/");
-                $client->executeScript($jquery);
-                sleep(2);
+
                 // TODO проверить на почту заказа и не плохая оценка
                 $data = [];
                 $data["id"]["name"]  = "номер заказа";
-                $data["id"]["value"] = $client->executeScript("return $('.modal__header h2').html()");
+                $data["id"]["value"] = $order_id;
                 $data["date"]["name"] = "дата получения заказа";
-                $data["date"]["value"] = $client->executeScript("return $('.modal__header h2').html()");
-                $data["sum"]["name"] = "стоимость общая";
-                $data["sum"]["value"] = $client->executeScript("return $('.sum-row .price strong').html()");
-                $data["open_text"]["name"] = "текст открытки";
-                $data["open_text"]["value"] = $client->executeScript("return $('.sum-row .price strong').html()");
-                $data["phone"]["name"] = "телефон заказчика";
-                $data["phone"]["value"] = $client->executeScript("return $('.user-contact-info .phone a').html()");
-                $data["email"]["name"] = "почта заказчика";
-                $data["email"]["value"] = $client->executeScript("return $('.sum-row .price strong').html()");
-                $data["fio"]["name"] = "Имя покупателя";
-                $data["fio"]["value"] = $client->executeScript("return $('.sum-row .price strong').html()");
+                $data["date"]["value"] = $order["order_date"];
 
-                var_dump($data);
+                $data["delivery_time"]["name"] = "дата доставки и время";
+                $data["delivery_time"]["value"] = $order["delivery_date"];
+                $data["delivery_address"]["name"] = "адрес доставки";
+                $data["delivery_address"]["value"] = $order["order_address"];
+
+                $client->request('GET', "https://bukedo.ru/cabinet/orders/".$order_id."/form/");
+                $client->executeScript($jquery);
+                sleep(2);
+                $data["sum"]["name"] = "стоимость общая";
+                $data["sum"]["value"] = $client->executeScript("return $('.sum-row .price strong').text()");
+                $data["open_text"]["name"] = "текст открытки";
+                $data["open_text"]["value"] = "!!!";//$client->executeScript("return $('.sum-row .price strong').text()");
+                $data["phone1"]["name"] = "телефон заказчика";
+                $data["phone1"]["value"] = $client->executeScript("return $('.info-block div.user-contact-info').eq(1).find('.phone').text()");
+                $data["email1"]["name"] = "почта заказчика";
+                $data["email1"]["value"] = $client->executeScript("return $('.info-block div.user-contact-info').eq(1).find('.clearfix > a.common-link_underline').text()");
+                $data["fio1"]["name"] = "Имя заказчика";
+                $data["fio1"]["value"] = $client->executeScript("return $('.info-block div.user-contact-info').eq(1).find('.name').text() ? $('.info-block div.user-contact-info').eq(1).find('.name').text():'Любимый покупатель'");
+                $data["fio0"]["name"] = "Имя получателя";
+                $data["fio0"]["value"] = $client->executeScript("return $('.info-block div.user-contact-info').eq(0).find('.name').text()");
+                $data["phone0"]["name"] = "телефон получателя";
+                $data["phone0"]["value"] = $client->executeScript("return $('.info-block div.user-contact-info').eq(0).find('.phone').text()");
+                $data["povod"]["name"] = "Повод";
+                $data["povod"]["value"] = "!!!";//$client->executeScript("return $('.info-block div.user-contact-info').eq(0).find('.name').text()");
+                $data["payment"]["name"] = "оплата всегда выбираю на расчетный счет";
+                $data["payment"]["value"] = "!!!";
+                $data["notify_email"]["name"] = "уведомить о доставке по email";
+                $data["notify_email"]["value"] = 0;
+                $data["delivery_time_fact"]["name"] = "фактически доставлено - любое время из интервала доставки";
+                $data["delivery_time_fact"]["value"] = "!!!";
+                $data["man"]["name"] = "Кто принял (Савинова Элина)";
+                $data["man"]["value"] = 0;
+                $data["from"]["name"] = "откуда о нас узнали - любое";
+                $data["from"]["value"] = 0;
+
+
+                foreach ($data as &$val){
+                    $val["value"] = trim($val["value"]);
+                    echo $val["name"] ." - ". $val["value"]." \n";
+                }
 
                 $line = readline("ОТправить ?");
                 if($line == "yes"){
@@ -100,9 +132,20 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                     $client->executeScript("$('#auth_form button').click();");
                     sleep("2");
                     $client->executeScript("$(\".dashboard-content a:contains(Регистрация заказов)\")[0].click()");
-                    sleep("2");
+                    sleep("4");
                     $client->executeScript("angular.element(document.querySelector('.glyphicon-plus')).click();");
                     $client->executeScript("angular.element(document.querySelector('#order_id')).val('".$data['id']['value']."');");
+                    $client->executeScript("angular.element(document.querySelector('#channel_id')).val(".$data['man']['value'].");");
+                    $client->executeScript("angular.element(document.querySelector('#buket_price')).val('".$data['sum']['value']."');");
+                    $client->executeScript("angular.element(document.querySelector('#customer_phone')).val('".$data['phone1']['value']."');");
+                    $client->executeScript("angular.element(document.querySelector('#customer_email')).val('".$data['email1']['value']."');");
+                    $client->executeScript("angular.element(document.querySelector('#customer_name')).val('".$data['fio1']['value']."');");
+                    $client->executeScript("angular.element(document.querySelector('#recipient_phone')).val('".$data['phone0']['value']."');");
+                    $client->executeScript("angular.element(document.querySelector('#recipient_name')).val('".$data['fio0']['value']."');");
+                    $client->executeScript("angular.element(document.querySelector('#reference_id')).val(".$data['from']['value'].");");
+                    $client->executeScript("angular.element(document.querySelector('#notice_channel_id')).val(".$data['notify_email']['value'].");");
+
+                    $line = readline("Сохранить с такими данными?");
                 }else{
                     return;
                 }
@@ -112,7 +155,7 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
         кто поинял ( савинова элина)
         стоимомть общую (Вам..)
         текст открытки
-        состав
+        состав!!!!!
         телефон заказчика, почта заказчика
         имя, если нет, то пишу Любимый покупатель.
         имя получателя
