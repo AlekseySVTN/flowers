@@ -48,7 +48,7 @@ class GetFlowersCommand extends Command
             $client->executeScript("$('.content__wrapper').find('form input[name=\'password\']').val('".$_SERVER["PASS_FLOWERS_FROM"]."')");
             $client->executeScript("$('.content__wrapper').find('.btn.yellow').click();");
             sleep(2);
-            $crawler = $client->request('GET', 'https://bukedo.ru/cabinet/orders/?created_from=2019-2-1&created_to=2019-6-24&page_size=1&status=3'); // Yes, this
+            $crawler = $client->request('GET', 'https://bukedo.ru/cabinet/orders/?created_from=2019-2-1&created_to=2019-6-24&page_size=500&status=3'); // Yes, this
             sleep(2);
 
             $script = 'var orders = {};
@@ -67,6 +67,7 @@ script.src = \'https://code.jquery.com/jquery-1.11.0.min.js\';
 script.type = \'text/javascript\';
 document.getElementsByTagName(\'head\')[0].appendChild(script);';
 
+            $fp = fopen('/home/aleksey/strom_projects/flowers/flowers/my-project/1.csv', 'w');
             foreach ($order_ids as $order_id=>$order){
                 if(!$order_id){
                     continue;
@@ -114,11 +115,26 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                 $data["from"]["name"] = "откуда о нас узнали - любое";
                 $data["from"]["value"] = 0;
 
-
+$csv_data = [];
                 foreach ($data as &$val){
                     $val["value"] = trim($val["value"]);
                     echo $val["name"] ." - ". $val["value"]." \n";
+                    $csv_data[] = $val["value"];
                 }
+
+
+
+
+
+
+
+                    fputcsv($fp, $csv_data);
+                continue;
+
+
+
+
+
 
                 $line = readline("ОТправить ?");
                 if($line == "yes"){
@@ -171,6 +187,7 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                 sleep(15);
                 return;
             }
+            fclose($fp);
 
 
 // website is 100% in JavaScript
