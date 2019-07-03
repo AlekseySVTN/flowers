@@ -11,6 +11,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class GetFlowersCommand extends Command
 {
+
+
+    /*
+     * TODO Стоимость именно вам Номер заказа 8знаков Пример открытки мне привести ТОлько 5рка
+     *
+     *
+     * */
+
+
     protected static $defaultName = 'app:get_flowers';
 
     protected function configure()
@@ -134,7 +143,7 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                     $client->executeScript("$(\".dashboard-content a:contains(Регистрация заказов)\")[0].click()");
                     $client->executeScript("angular.element(document.querySelector('.glyphicon-plus')).click();");
                     sleep("4");
-                    $client->executeScript("angular.element(document.querySelector('#order_id')).val('".$data['id']['value']."');");
+                    $client->executeScript("angular.element(document.querySelector('#order_id')).val('".str_pad($data['id']['value'],8, "000", STR_PAD_LEFT)."');");
                     $client->executeScript("angular.element(document.querySelector('#channel_id')).val(".$data['man']['value'].");");
                     $client->executeScript("angular.element(document.querySelector('#buket_price')).val('".$data['sum']['value']."');");
                     $client->executeScript("angular.element(document.querySelector('#customer_phone')).val('".$data['phone1']['value']."');");
@@ -144,12 +153,18 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                     $client->executeScript("angular.element(document.querySelector('#recipient_name')).val('".$data['fio0']['value']."');");
                     $client->executeScript("angular.element(document.querySelector('#reference_id')).val(".$data['from']['value'].");");
                     $client->executeScript("angular.element(document.querySelector('#notice_channel_id')).val(".$data['notify_email']['value'].");");
-                    $client->executeScript("$('input.form-control.text-center.ng-pristine.ng-valid.ng-valid-required').val(".date("Y-m-d", $data['delivery_time']['value']).");");
+                    $client->executeScript("$('input.form-control.text-center.ng-pristine.ng-valid.ng-valid-required').val(".date("Y-m-d", (int)$data['delivery_time']['value']).");");
 
 
-                    $line = readline("Сохранить с такими данными?");
+                    $next = readline("Перейти к следующему заказу?");
                 }else{
-                    return;
+                    $next = readline("Перейти к следующему заказу?");
+                }
+
+                if($next == "yes"){
+                    continue;
+                }else{
+                    break;
                 }
                 /*
                  * номер заказа
@@ -170,8 +185,6 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
         уведомить о доставке по email
         фактически доставлено - любое время из интервала доставки
                  * */
-                sleep(15);
-                return;
             }
 
 
