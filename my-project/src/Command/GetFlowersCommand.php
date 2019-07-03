@@ -124,8 +124,11 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                 $data["from"]["value"] = 0;
 
 
-                foreach ($data as &$val){
+                foreach ($data as $key => &$val){
                     $val["value"] = trim($val["value"]);
+                    if(($key == "phone0" || $key == "phone1") && $val["value"]){
+                        $val["value"] = preg_replace('/\D+/', '', $val["value"]);
+                    }
                     echo $val["name"] ." - ". $val["value"]." \n";
                 }
 
@@ -143,16 +146,21 @@ document.getElementsByTagName(\'head\')[0].appendChild(script);';
                     $client->executeScript("$(\".dashboard-content a:contains(Регистрация заказов)\")[0].click()");
                     $client->executeScript("angular.element(document.querySelector('.glyphicon-plus')).click();");
                     sleep("4");
+
+
                     $client->executeScript("angular.element(document.querySelector('#order_id')).val('".str_pad($data['id']['value'],8, "000", STR_PAD_LEFT)."');");
-                    $client->executeScript("angular.element(document.querySelector('#channel_id')).val(".$data['man']['value'].");");
-                    $client->executeScript("angular.element(document.querySelector('#buket_price')).val('".$data['sum']['value']."');");
-                    $client->executeScript("angular.element(document.querySelector('#customer_phone')).val('".$data['phone1']['value']."');");
-                    $client->executeScript("angular.element(document.querySelector('#customer_email')).val('".$data['email1']['value']."');");
-                    $client->executeScript("angular.element(document.querySelector('#customer_name')).val('".$data['fio1']['value']."');");
-                    $client->executeScript("angular.element(document.querySelector('#recipient_phone')).val('".$data['phone0']['value']."');");
-                    $client->executeScript("angular.element(document.querySelector('#recipient_name')).val('".$data['fio0']['value']."');");
-                    $client->executeScript("angular.element(document.querySelector('#reference_id')).val(".$data['from']['value'].");");
-                    $client->executeScript("angular.element(document.querySelector('#notice_channel_id')).val(".$data['notify_email']['value'].");");
+                    $client->executeScript("angular.element(document.querySelector('#order_id')).change();");
+
+                    $client->executeScript("angular.element(document.querySelector('#channel_id')).val(".$data['man']['value'].").change();");
+
+                    $client->executeScript("angular.element(document.querySelector('#buket_price')).val('".$data['sum']['value']."').change();");
+                    $client->executeScript("angular.element(document.querySelector('#customer_phone')).val('".$data['phone1']['value']."').change();");
+                    $client->executeScript("angular.element(document.querySelector('#customer_email')).val('".$data['email1']['value']."').change();");
+                    $client->executeScript("angular.element(document.querySelector('#customer_name')).val('".$data['fio1']['value']."').change();");
+                    $client->executeScript("angular.element(document.querySelector('#recipient_phone')).val('".$data['phone0']['value']."').change();");
+                    $client->executeScript("angular.element(document.querySelector('#recipient_name')).val('".$data['fio0']['value']."').change();");
+                    $client->executeScript("angular.element(document.querySelector('#reference_id')).val(".$data['from']['value'].").change();");
+                    $client->executeScript("angular.element(document.querySelector('#notice_channel_id')).val(".$data['notify_email']['value'].").change();");
                     $client->executeScript("$('input.form-control.text-center.ng-pristine.ng-valid.ng-valid-required').val(".date("Y-m-d", (int)$data['delivery_time']['value']).");");
 
 
